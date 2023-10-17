@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState} from 'react';
 import { AuthContext } from '../AuthContext/AuthContext';
 import { useContext } from 'react';
 function LoginForm() {
   const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const emailInputRef = useRef(null);
+  // const emailInputRef = useRef(null);
 
   const handleLogin = () => {
     const { email, password } = formData;
@@ -58,7 +58,8 @@ function LoginForm() {
           name="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          ref={emailInputRef} // Autofocus on email input
+          // ref={emailInputRef} // Autofocus on email input
+          autoFocus
         />
       </div>
       <div className="form-group">
