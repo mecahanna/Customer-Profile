@@ -1,6 +1,11 @@
 import React, { useState} from 'react';
 import { AuthContext } from '../AuthContext/AuthContext';
 import { useContext } from 'react';
+import { Button } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
 function LoginForm() {
   const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -46,35 +51,41 @@ function LoginForm() {
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
-  
 
-  return (
-    <div className="login-form">
-      <h2>Login</h2>
-      <div className="form-group">
-        <label>Email:</label>
-        <input
-          type="text"
-          name="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          // ref={emailInputRef} // Autofocus on email input
-          autoFocus
-        />
-      </div>
-      <div className="form-group">
-        <label>Password:</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        />
-      </div>
-      {error && <p className="error-message">{error}</p>}
-      <button onClick={handleLogin}>Login</button>
-    </div>
-  );
+
+
+
+return (
+  <div className="login-form">
+    <Typography variant="h6" >Login</Typography>
+    <Box mb={2}>
+      <TextField
+        label="Email"
+        type="text"
+        name="email"
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        autoFocus
+      />
+    </Box>
+    <Box mb={2}>
+      <TextField
+        label="Password"
+        type="password"
+        name="password"
+        value={formData.password}
+        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+      />
+    </Box>
+    {error && <Typography color="error">{error}</Typography>}
+    <Button variant="contained" color="primary" onClick={handleLogin}>
+      Login
+    </Button>
+  </div>
+);
 }
+
+
+
 
 export default LoginForm;

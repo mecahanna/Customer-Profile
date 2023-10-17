@@ -1,26 +1,50 @@
 import React, { useEffect, useState } from 'react';
-
-import { retrieveCharacters } from '../../services/rnm.service'
+import { retrieveCharacters } from '../../services/rnm.service';
+import {
+  Pagination,
+  Button,
+  Input,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Typography,
+  Grid,
+} from '@mui/material';
 
 function CharacterList() {
   const [characters, setCharacters] = useState([]);
-  const [totalPageCount, setTotalPageCount] = React.useState(0);
-  const [showDetails, setShowDetails] = useState(false);
-  const [search,setsearch]=useState();
-  const [filters, setFilters] = React.useState({
+  const [totalPageCount, setTotalPageCount] = useState(0);
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({
     page: 1,
-    name: "",
-    gender:"",
-    status:"",
-    species:""
-  })
+    name: '',
+    gender: '',
+    status: '',
+    species: '',
+  });
 
   useEffect(() => {
     const fetchCharacterData = async () => {
       try {
-       
-        const data = await retrieveCharacters(filters.page, filters.name,filters.status, filters.gender,filters.species)
-        setCharacters(data.results);
+        const data = await retrieveCharacters(
+          filters.page,
+          filters.name,
+          filters.status,
+          filters.gender,
+          filters.species
+        );
+        // Add a 'showDetails' property to each character and initialize it to false
+        const charactersWithDetails = data.results.map((character) => ({
+          ...character,
+          showDetails: false,
+        }));
+        setCharacters(charactersWithDetails);
         setTotalPageCount(data.info.pages);
       } catch (error) {
         console.error('Error fetching character data:', error);
@@ -31,22 +55,26 @@ function CharacterList() {
   }, [filters]);
 
   const handleChange = (e) => {
-  setFilters( ((prevState) => { return {...prevState, [e.target.name] : e.target.value}}))
-  }
+    setFilters((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
+  };
 
-  const handleSearchsubmitted = () => {
+  const handleSearchSubmitted = () => {
     setFilters({
       ...filters,
-      name: search
-    })
-  }
-
-
-  // Function to toggle the showDetails state
-  const toggleShowDetails = () => {
-    setShowDetails(!showDetails);
+      name: search,
+    });
   };
-  
+
+  const toggleShowDetails = (characterId) => {
+    // Toggle the 'showDetails' property for the clicked character
+    setCharacters((prevCharacters) =>
+      prevCharacters.map((character) =>
+        character.id === characterId
+          ? { ...character, showDetails: !character.showDetails }
+          : character
+      )
+    );
+  };
 
   const handlePrevPage = () => {
     if (filters.page > 1) {
@@ -59,82 +87,139 @@ function CharacterList() {
       setFilters({ ...filters, page: filters.page + 1 });
     }
   };
-console.log(filters)
+
+
+  // Split characters into three columns
+  const columns = [[], [], []];
+  characters.forEach((character, index) => {
+    columns[index % 3].push(character);
+  });
+
   return (
     <div>
       <h2>Character List</h2>
+      <Grid container justifyContent="center" alignItems="center" spacing={0}>
+        <Grid item xs={2}>
+          <Input
+            type="text"
+            placeholder="Search characters"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={0}>
+          <Button variant="contained" color="primary" onClick={handleSearchSubmitted}>
+            Submit
+          </Button>
+        </Grid>
+      </Grid>
+
       <div>
-        <input
-          type="text"
-          placeholder="Search characters"
-          value={search}
-          onChange={(e) => setsearch(e.target.value)}
-        />
-        <button onClick={handleSearchsubmitted}>submit</button>
-        <div className="filter-options">
-          <select
-          name='gender'
-            value={filters.gender}
-            onChange={handleChange}
-          >
-            <option value="">All Genders</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="genderless">Genderless</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        
-          <select
-            name='status'
-            value={filters.status}
-            onChange={handleChange}
-          >
-            <option value="">All Statuses</option>
-            <option value="alive">Alive</option>
-            <option value="dead">Dead</option>
-            <option value="unknown">Unknown</option>
-          </select>
-          <select
-             name='species'
-            value={filters.species}
-            onChange={handleChange}
-          >
-            <option value="">All Species</option>
-            <option value="human">Human</option>
-            <option value="alien">Alien</option>
-            <option value="animal">Animal</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        </div>
+        <Grid container justifyContent="center" alignItems="center" padding={3} spacing={3}>
+          <Grid item xs={3}>
+            <FormControl fullWidth>
+              <InputLabel>Gender</InputLabel>
+              <Select name="gender" value={filters.gender} onChange={handleChange}>
+                <MenuItem value="">All Genders</MenuItem>
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+                <MenuItem value="genderless">Genderless</MenuItem>
+                <MenuItem value="unknown">Unknown</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={3}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select name="status" value={filters.status} onChange={handleChange}>
+                <MenuItem value="">All Statuses</MenuItem>
+                <MenuItem value="alive">Alive</MenuItem>
+                <MenuItem value="dead">Dead</MenuItem>
+                <MenuItem value="unknown">Unknown</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={3}>
+            <FormControl fullWidth>
+              <InputLabel>Species</InputLabel>
+              <Select name="species" value={filters.species} onChange={handleChange}>
+                <MenuItem value="">All Species</MenuItem>
+                <MenuItem value="human">Human</MenuItem>
+                <MenuItem value="alien">Alien</MenuItem>
+                <MenuItem value="animal">Animal</MenuItem>
+                <MenuItem value="unknown">Unknown</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
       </div>
-      <ul>
-        {characters && characters.map((character) => (
-          <li key={character.id}>
-            <img src={character.image} alt={character.name} />
-            <p>{character.name}</p>
-            {showDetails && ( // Conditionally render details based on showDetails state
-              <>
-                <p>Status: {character.status}</p>
-                <p>Species: {character.species}</p>
-                <p>Gender: {character.gender}</p>
-              </>
-            )}
-            <button onClick={toggleShowDetails}>
-              {showDetails ? 'Hide Details' : 'Show Details'}
-            </button>
-          </li>
+
+
+
+
+      <Grid container spacing={2}>
+        {columns.map((column, columnIndex) => (
+          <Grid item xs={4} key={columnIndex}>
+            <List>
+              {column.map((character) => (
+                <ListItem key={character.id}>
+                  <ListItemAvatar>
+                    <Avatar src={character.image} alt={character.name} />
+                  </ListItemAvatar>
+                  <ListItemText primary={character.name} secondary={character.showDetails && (
+                    <>
+                      <Typography>Status: {character.status}</Typography>
+                      <Typography>Species: {character.species}</Typography>
+                      <Typography>Gender: {character.gender}</Typography>
+                    </>
+                  )} />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => toggleShowDetails(character.id)}
+                  >
+                    {character.showDetails ? 'Hide Details' : 'Show Details'}
+                  </Button>
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
         ))}
-      </ul>
-      <div className='pagination'>
-        <button onClick={handlePrevPage} disabled={filters.page === 1}>
+      </Grid>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+        <Pagination
+          count={totalPageCount}
+          page={filters.page}
+          onChange={(event, page) => setFilters({ ...filters, page })}
+          variant="outlined"
+          shape="rounded"
+          color="primary"
+        />
+      </div>
+
+
+      <div className="pagination">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handlePrevPage}
+          disabled={filters.page === 1}
+          style={{ marginRight: '10px' }}
+        >
           Previous Page
-        </button>
-        <button onClick={handleNextPage} disabled={filters.page === totalPageCount}>
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleNextPage}
+          disabled={filters.page === totalPageCount}
+        >
           Next Page
-        </button>
+        </Button>
       </div>
     </div>
   );
-};
+}
 
 export default CharacterList;
+
