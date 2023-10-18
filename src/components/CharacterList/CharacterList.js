@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { retrieveCharacters } from '../../services/rnm.service';
 import {
   Pagination,
@@ -16,9 +17,11 @@ import {
   Typography,
   Grid,
 } from '@mui/material';
+import Loader from '../Loader/Loader';
 
 function CharacterList() {
   const [characters, setCharacters] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
@@ -31,6 +34,7 @@ function CharacterList() {
 
   useEffect(() => {
     const fetchCharacterData = async () => {
+      setLoading(true)
       try {
         const data = await retrieveCharacters(
           filters.page,
@@ -46,7 +50,9 @@ function CharacterList() {
         }));
         setCharacters(charactersWithDetails);
         setTotalPageCount(data.info.pages);
+        setLoading(false)
       } catch (error) {
+        setLoading(false)
         console.error('Error fetching character data:', error);
       }
     };
@@ -98,7 +104,7 @@ function CharacterList() {
   return (
     <div>
       <h2>Character List</h2>
-      <Grid container justifyContent="center" alignItems="center" spacing={0}>
+      <Grid container justifyContent="center" alignItems="center" >
         <Grid item xs={2}>
           <Input
             type="text"
@@ -113,6 +119,7 @@ function CharacterList() {
           </Button>
         </Grid>
       </Grid>
+      
 
       <div>
         <Grid container justifyContent="center" alignItems="center" padding={3} spacing={3}>
@@ -158,7 +165,7 @@ function CharacterList() {
 
 
       <Grid container spacing={2}>
-        {columns.map((column, columnIndex) => (
+        {!loading ? columns.map((column, columnIndex) => (
           <Grid item xs={4} key={columnIndex}>
             <List>
               {column.map((character) => (
@@ -184,8 +191,9 @@ function CharacterList() {
               ))}
             </List>
           </Grid>
-        ))}
+        )): <Loader/>}
       </Grid>
+
       <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
         <Pagination
           count={totalPageCount}
